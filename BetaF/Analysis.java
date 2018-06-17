@@ -431,6 +431,8 @@ public class Analysis
     		double circleY = currentY - closestDist;
     		double diameter = closestDist * 2;
     		
+    		
+    		enemy.getValue().setClosestDist(closestDist);
     		circles[i] = new Ellipse2D.Double(circleX, circleY, diameter, diameter);
     		i+=1;
     	}

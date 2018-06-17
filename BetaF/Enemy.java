@@ -28,6 +28,8 @@ public class Enemy
 	private int numAddedID;
     //WAVES
     //private LinkedList<EWave>
+	private double closestDist;
+	private boolean updatedWaves;
     
     //ClASS
     public Enemy(EnemyData initialData, int[][] gunStats, int numAdded)
@@ -42,6 +44,8 @@ public class Enemy
     	numAddedID = numAdded;
     	currentIndex = 0;
     	data.add(currentIndex, initialData);
+    	closestDist = Integer.MAX_VALUE;
+    	updatedWaves = false;
     }
     
     //get
@@ -214,5 +218,32 @@ public class Enemy
 	{
 		long relativeAge = getLatest().getAge(time) + getScanOrder();
 		return relativeAge;
+	}
+
+	public void setClosestDist(double diameter) {
+		closestDist = diameter;
+	}
+	public double getClosestDist() {
+
+		return closestDist;
+	}
+
+	public double getDistFromWall() 
+	{
+		double[] bounds = Util.getAbsoluteFieldBoundsxXyY();
+		double x = getX();
+		double y = getY();
+		
+        double shortestDistance = Math.min(Math.min(Math.min(Point2D.distance(x, 0.0, bounds[0], 0.0), Point2D.distance(x, bounds[2], bounds[1], bounds[2])), Point2D.distance(0.0, y, 0.0, bounds[2])),Point2D.distance(bounds[1], y, bounds[1], bounds[3]));
+
+        return shortestDistance;
+	}
+
+	public void setUpdatedWaves(boolean b) {
+		updatedWaves = b;
+	}
+	public boolean getUpdatedWaves()
+	{
+		return updatedWaves;
 	}
 } 

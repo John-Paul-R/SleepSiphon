@@ -22,30 +22,30 @@ import gun.*;
 import java.awt.event.KeyEvent;
 
 /*
-	ARobotTest - © 2018 John Paul Rutigliano
-	==============================================================================
-	This software is provided 'as-is', without any express or implied
-	warranty. In no event will the authors be held liable for any damages
-	arising from the use of this software.
-	
-	Permission is granted to anyone to use this software for any purpose,
-	including commercial applications and to alter it and redistribute it
-	freely, subject to the following restrictions:
-	
-		1. The origin of this software must not be misrepresented; you must not
-		claim that you wrote the original software. If you use this software
-		in a product, an acknowledgment in the product documentation would be
-		appreciated but is not required.
-	
-		2. Altered source versions must be plainly marked as such, and must not be
-		misrepresented as being the original software.
-	
-		3. This notice may not be removed or altered from any source
-		distribution.
-  		
-  		4. This software, and robots derived from this software may not be
-  		used in ANY competition without express permission from the author.
-	==============================================================================
+SleepSiphon - © 2018 John Paul Rutigliano
+==============================================================================
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+  1. The origin of this software must not be misrepresented; you must not
+  claim that you wrote the original software. Anything you publish containing
+  all or parts of this software must credit author of the original software
+  (John Paul Rutigliano).
+
+  2. Altered source versions must be plainly marked as such, and must not be
+  misrepresented as being the original software.
+
+  3. This notice may not be removed or altered from any source
+  distribution.
+
+  4. This software, and robots derived from this software may not be
+  used in any robocode competition without express permission from the author.
+==============================================================================
  */
 
 //TODO Bullet power should increase with confidence that it will hit
@@ -58,7 +58,7 @@ public class SleepSiphon extends AdvancedRobot
     
     private int radarMode = 3;
     private int targetMode = 0; //ADD THIS IN FUTURE for different target selection algorithms
-    private int moveMode = 5;
+    private int moveMode = 9000;
     //private int aimMode = 5;  //REPLACED BY VIRTUAL GUNS (PER ENEMY)
     //private int fireMode = 0; //Not yet implemented
     private String cTargetName = "";
@@ -73,7 +73,7 @@ public class SleepSiphon extends AdvancedRobot
     private WeightedPoint[] destinationPoints = null;
     
     private int NUM_GUNS = 4;
-    private VirtualPointGuns vPointGuns;
+    //private VirtualPointGuns vPointGuns;
     private VirtualAngleGuns vAngleGuns;
 	private File gStats;
 	RobocodeFileWriter gStatsWriter;
@@ -124,7 +124,7 @@ public class SleepSiphon extends AdvancedRobot
 		predictedEnemyPointAtTime[2] = -1;
 		final double FIELD_BUFFER = 12;
 		Util.setFieldBoundsArray(this, FIELD_BUFFER);
-		vPointGuns = new VirtualPointGuns(this, currentEnemies);
+		//vPointGuns = new VirtualPointGuns(this, currentEnemies);
 		vAngleGuns = new VirtualAngleGuns(this, currentEnemies);
 		gStats = getDataFile("SleepSiphon_GunStats.csv");
 		debugFile = getDataFile("debugOutput.log");
@@ -240,9 +240,29 @@ public class SleepSiphon extends AdvancedRobot
             	vAngleGuns.virtualFireAll();
             	vAngleGuns.updateAll();
             	double BULLET_POWER = Aim.firePowerByDist(this, cTargetEnemy);
-             	if (getEnergy() <= 30)
+            	if (getEnergy() < 0.2) 
+            	{
+            		BULLET_POWER = 0;
+            	}
+            	else if (getEnergy() <= 5)
+            	{
+            		BULLET_POWER = .1;
+            	}
+            	else if (getEnergy() <= 15)
             	{
             		BULLET_POWER *= .2;
+            	}
+            	else if (getEnergy() <= 20)
+            	{
+            		BULLET_POWER *= .3;
+            	}
+            	else if (getEnergy() <= 25)
+            	{
+            		BULLET_POWER *= .6;
+            	}
+            	else if (getEnergy() >= 80)
+            	{
+            		BULLET_POWER *= 2;
             	}
             	//System.out.println(cTargetName + "\t\t" + cTargetEnemy.getBestGunHitRate());
             	boolean disabledEnemy = false;
@@ -255,7 +275,7 @@ public class SleepSiphon extends AdvancedRobot
 	            			//System.out.println("NOT Firing Based on ML Data");
 	            	}
             	}
-            	if (!disabledEnemy)
+            	if (!disabledEnemy && BULLET_POWER > 0)
             	{
             		if (currentTime > 70 || this.getNumRounds() > 1 && cTargetEnemy.getBestGunHitRate() >= 0.15)
 	            	{
@@ -315,7 +335,17 @@ public class SleepSiphon extends AdvancedRobot
             	{
 	            	String cName = entry.getKey(); //This will be changed for melee
 	            	Enemy cEnemy = entry.getValue();
-	            	if (cEnemy != null && cEnemy.numEntries() >= 3)
+	            	boolean crashedEnemy = false;
+	            	boolean crashedWall = false;
+	            	boolean hitByBullet = false;
+	            	if (cEnemy.getClosestDist() < 50)
+	            		System.out.println(cName + " " + cEnemy.getClosestDist());
+	            	if (cEnemy.getClosestDist() < 50)
+	            		crashedEnemy = true;
+	            	if (cEnemy.getDistFromWall() < 20 && cEnemy.getVelocity() == 0)
+	            		crashedWall = true;
+	            	
+	            	if (cEnemy != null && cEnemy.numEntries() >= 3 && !crashedEnemy && !crashedWall && !hitByBullet && !cEnemy.getUpdatedWaves())
 	            	{//I might have to turn this all back a turn to wait for event data
 	            		ArrayList<EnemyData> eData = cEnemy.getDataSet();
 	            		int eDataSize = eData.size();
@@ -346,62 +376,66 @@ public class SleepSiphon extends AdvancedRobot
 		            	
 		            	cEnemy.setEnergyLost(0);
 		            	cEnemy.setEnergyGained(0);
-		            	EnemyWave closestWave = null;
-		            	double closestDist = Double.POSITIVE_INFINITY;
-		            	for (int i = 0; i < eWaves.size(); i++)//increments a counter when waves are close, then removes waves once counter fills to a predefined amount in the EnemyWave class
-		            	{
-		            		EnemyWave cWave = eWaves.get(i);
-		            		double cDist = cWave.getDist(getX(), getY(), getTime());
-		            		if (cDist < closestDist)
-		            		{
-		            			closestDist = cDist;
-		            			closestWave = cWave;
-		            		}
-		            		if (cDist < 40)
-		            			cWave.setClose();
-	
-		            		if (cWave.getClose() <= 0)
-		            		{
-		            			eWaves.remove(i);
-		            			i--;
-		            		}
-		            			//System.out.println("WAVE IS NEAR");
-		            	}
+		            	cEnemy.setUpdatedWaves(true);
+
 	            	}
-            		if (is1v1 || moveMode == 9000)
-            		{            	
-            			double minDistance = 20;
-            			destinations = Move.generatePointsCircular(new Point2D.Double(getX(), getY()), 16, 150);
-            			//destinations = Move.removeCloseCoordinates(destinations, minDistance);
-            	    	paths = Move.generatePaths(this, destinations);
-            	    	
-            	    	double[] pathRisks_wave = Analysis.calcPathRisksByDist_WAVE(paths, eWaves, pointsPerWave, getTime());
-            	    	double[] pathRisks_bot = Analysis.calcPathRisksByDist_BOT(paths, cTargetEnemy.getLatest(), getTime());
-            	    	Analysis.calcPath_repelWalls(paths);
-            	    	//Analysis.calcPath_NearBot(paths, cTargetEnemy);
-            	    	double[] pathRepelCorners = Analysis.calcPath_repelCorners(paths);
-            	    	pathRisks = Analysis.getPathRisks(paths);
-            	    	//pathRisks = Analysis.sumDoubleArrays(pathRisks_wave, pathRisks_bot);//this updates the risk ("Weight") of each point as well
-            	    	//pathRisks = Analysis.sumDoubleArrays(pathRisks, pathRepelCorners);
-            	    	bestDestinationPoint = destinations[Analysis.getSafestPathIndex(pathRisks)];
-            	    	Move.aGoTo(this, bestDestinationPoint.getX(), bestDestinationPoint.getY());
-            		}
-            		{/*
-            			Vector riskVector = closestWave.getRiskVector(new TimedPoint(getX(), getY(), getTime()));
-            			
-            			double direction = Math.signum(robocode.util.Utils.normalRelativeAngle(riskVector.getDirection()));
-            			//need to get the lateral components of this vector (relative to my bot) (Perpendicular to the trajectory of the bullet)
-            			//Also need to make sure my angle is perpendicular to it
-            			Point2D.Double resultPoint = Util.projectVector(
-            					new Point2D.Double(getX(), getY()),
-            					Math.atan2(cTargetEnemy.getX()-getX(), cTargetEnemy.getY()-getY())+Math.PI/2*direction,
-            					riskVector.getMagnitude());
-            			resultPoint = Util.limitCoordinateToMap(resultPoint);
-            			Move.aGoTo(this, resultPoint.getX(), resultPoint.getY());
-            			setTurnRightRadians(robocode.util.Utils.normalRelativeAngle(riskVector.getDirection()-getHeadingRadians()));
-            			setAhead(riskVector.getMagnitude());*/
-            		}
+	            	EnemyWave closestWave = null;
+	            	double closestDist = Double.POSITIVE_INFINITY;
+	            	for (int i = 0; i < eWaves.size(); i++)//increments a counter when waves are close, then removes waves once counter fills to a predefined amount in the EnemyWave class
+	            	{
+	            		EnemyWave cWave = eWaves.get(i);
+	            		double cDist = cWave.getDist(getX(), getY(), getTime());
+	            		if (cDist < closestDist)
+	            		{
+	            			closestDist = cDist;
+	            			closestWave = cWave;
+	            		}
+	            		if (cDist < 40)
+	            			cWave.setClose();
+
+	            		if (cWave.getClose() <= 0)
+	            		{
+	            			eWaves.remove(i);
+	            			i--;
+	            		}
+	            			//System.out.println("WAVE IS NEAR");
+	            	}
+
             	}
+        		if ((is1v1 || moveMode == 9000) && cTargetEnemy != null)
+        		{            	
+        			double minDistance = 20;
+        			destinations = Move.generatePointsCircular(new Point2D.Double(getX(), getY()), 16, 150);
+        			//destinations = Move.removeCloseCoordinates(destinations, minDistance);
+        	    	paths = Move.generatePaths(this, destinations);
+        	    	
+        	    	double[] pathRisks_wave = Analysis.calcPathRisksByDist_WAVE(paths, eWaves, pointsPerWave, getTime());
+        	    	double[] pathRisks_bot = Analysis.calcPathRisksByDist_BOT(paths, cTargetEnemy.getLatest(), getTime());
+        	    	Analysis.calcPath_repelWalls(paths);
+        	    	//Analysis.calcPath_NearBot(paths, cTargetEnemy);
+        	    	double[] pathRepelCorners = Analysis.calcPath_repelCorners(paths);
+        	    	pathRisks = Analysis.getPathRisks(paths);
+        	    	//pathRisks = Analysis.sumDoubleArrays(pathRisks_wave, pathRisks_bot);//this updates the risk ("Weight") of each point as well
+        	    	//pathRisks = Analysis.sumDoubleArrays(pathRisks, pathRepelCorners);
+        	    	bestDestinationPoint = destinations[Analysis.getSafestPathIndex(pathRisks)];
+        	    	Move.aGoTo(this, bestDestinationPoint.getX(), bestDestinationPoint.getY());
+        		}
+        		{/*
+        			Vector riskVector = closestWave.getRiskVector(new TimedPoint(getX(), getY(), getTime()));
+        			
+        			double direction = Math.signum(robocode.util.Utils.normalRelativeAngle(riskVector.getDirection()));
+        			//need to get the lateral components of this vector (relative to my bot) (Perpendicular to the trajectory of the bullet)
+        			//Also need to make sure my angle is perpendicular to it
+        			Point2D.Double resultPoint = Util.projectVector(
+        					new Point2D.Double(getX(), getY()),
+        					Math.atan2(cTargetEnemy.getX()-getX(), cTargetEnemy.getY()-getY())+Math.PI/2*direction,
+        					riskVector.getMagnitude());
+        			resultPoint = Util.limitCoordinateToMap(resultPoint);
+        			Move.aGoTo(this, resultPoint.getX(), resultPoint.getY());
+        			setTurnRightRadians(robocode.util.Utils.normalRelativeAngle(riskVector.getDirection()-getHeadingRadians()));
+        			setAhead(riskVector.getMagnitude());*/
+        		}
+            	
       /*      	if (getDistanceRemaining() == 0)
             	{
 	            	setTurnRightRadians(Math.PI/2);
@@ -496,6 +530,11 @@ public class SleepSiphon extends AdvancedRobot
 
             	}
             }
+            else if (radarMode == 0)
+            {
+            	Radar.spinToCenter(this);
+            }
+            
             
             execute();
 		}
@@ -567,6 +606,7 @@ public class SleepSiphon extends AdvancedRobot
 						cEnemyLastData.getVelocity(),
 						cEnemyLastData.getTimeSinceDecel(), 
 						scanOrder));
+				currentEnemies.get(e.getName()).setUpdatedWaves(false);
 			
 			//ML ENEMY OBJECTS
 				
@@ -592,6 +632,8 @@ public class SleepSiphon extends AdvancedRobot
 					cEnemyLastData.getVelocity(),
 					cEnemyLastData.getTimeSinceDecel(),
 					scanOrder));
+			currentEnemies.get(e.getName()).setUpdatedWaves(false);
+
 		}
 		
 		
@@ -744,11 +786,8 @@ public class SleepSiphon extends AdvancedRobot
     		g.setColor(new Color(0xff, 0xff, 0xff, 150));
     		for (SelfWave wave : selfWaves)
 	    	{
-	    		
 	    		Ellipse2D.Double circle = wave.getCircle(cTime);
 		    	g.drawOval((int)circle.getX(), (int)circle.getY(), (int)circle.getWidth(), (int)circle.getHeight());
-		    	
-		    	//g.drawString(wave.getSource(), (int)circle.getX(), (int)circle.getY());
 	    	}
     	}
     	if (showEnemyWaves)
@@ -762,7 +801,6 @@ public class SleepSiphon extends AdvancedRobot
 		    		Color rgb = new Color(Color.HSBtoRGB(hueValue, 1F, 1F));
 					Color rgba = new Color(rgb.getRed(), rgb.getGreen(), rgb.getBlue(), 100);
 					g.setColor(rgba);
-		    		//g.setColor(new Color(0x00, 0xff, 0x00, 150));
 		    		
 		    		Ellipse2D.Double circle = wave.getCircle(cTime);
 			    	g.drawOval((int)circle.getX(), (int)circle.getY(), (int)circle.getWidth(), (int)circle.getHeight());
@@ -784,7 +822,6 @@ public class SleepSiphon extends AdvancedRobot
 	    		}
 	    	}
 	    	//System.out.println("Painting " + eWaves.size() + " Waves...");
-	    	
     	}
     	
     	if (showMovement && destinations != null)
