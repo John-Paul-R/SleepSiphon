@@ -3,9 +3,9 @@ package gun;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
 
-import BetaF.Aim;
-import BetaF.Enemy;
-import BetaF.SleepSiphon;
+import origin.Aim;
+import origin.Enemy;
+import origin.SleepSiphon;
 import util.TimedPoint;
 
 public class VirtualPointGuns

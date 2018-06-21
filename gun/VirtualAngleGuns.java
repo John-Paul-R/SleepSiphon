@@ -6,11 +6,11 @@ import java.awt.geom.Point2D;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
 
-import BetaF.Aim;
-import BetaF.Enemy;
-import BetaF.SleepSiphon;
-import BetaF.Util;
-import BetaF.WeightedPoint;
+import origin.Aim;
+import origin.Enemy;
+import origin.SleepSiphon;
+import origin.Util;
+import origin.WeightedPoint;
 import robocode.Rules;
 import util.TimedPoint;
 import util.Vector2D;

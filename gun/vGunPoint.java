@@ -3,11 +3,11 @@ package gun;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
-import BetaF.Aim;
-import BetaF.Analysis;
-import BetaF.Enemy;
-import BetaF.Util;
-import BetaF.SleepSiphon;
+import origin.Aim;
+import origin.Analysis;
+import origin.Enemy;
+import origin.SleepSiphon;
+import origin.Util;
 import robocode.Rules;
 import util.TimedPoint;
 

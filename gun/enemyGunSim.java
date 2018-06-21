@@ -4,9 +4,9 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.LinkedList;
 
-import BetaF.BotData;
-import BetaF.Enemy;
-import BetaF.Util;
+import origin.BotData;
+import origin.Enemy;
+import origin.Util;
 import robocode.Rules;
 import util.TimedPoint;
 

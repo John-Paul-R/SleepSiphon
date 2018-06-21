@@ -2,11 +2,10 @@ package gun;
 
 import java.awt.geom.Point2D;
 
-import BetaF.Analysis;
-import BetaF.BotData;
-import BetaF.Enemy;
-import BetaF.BotData;
-import BetaF.Util;
+import origin.Analysis;
+import origin.BotData;
+import origin.Enemy;
+import origin.Util;
 import robocode.Rules;
 import util.TimedPoint;
 
