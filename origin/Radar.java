@@ -105,6 +105,20 @@ public class Radar
 
 	
 	}
+	public static double calcSimpleMEA(Point2D reference, Point2D target, double velocity, int angularDirectionSignnum, long time)
+	{
+		double relX = target.getX()-reference.getX();
+		double relY = target.getY()-reference.getY();
+		double bearing = Math.atan2(relX, relY);
+		double perpendicular = bearing + Math.PI/2;
+		
+		double maxEscapeDistance = velocity * angularDirectionSignnum * time;
+		double maxRelEscapeX = maxEscapeDistance * Math.sin(perpendicular) + relX;
+		double maxRelEscapeY = maxEscapeDistance * Math.cos(perpendicular) + relY;
+		double maxEscapeAngle = Math.atan2(maxRelEscapeX, maxRelEscapeY);
+		
+		return maxEscapeAngle;
+	}
 	public static double calcSimpleMEA(Point2D reference, Point2D target, double velocity, double heading, long time)
 	{
 		double relX = target.getX()-reference.getX();
@@ -122,20 +136,7 @@ public class Radar
 		return maxEscapeAngle;
 	}
 	
-	public static double calcSimpleMEA(Point2D reference, Point2D target, double velocity, int angularDirectionSignnum, long time)
-	{
-		double relX = target.getX()-reference.getX();
-		double relY = target.getY()-reference.getY();
-		double bearing = Math.atan2(relX, relY);
-		double perpendicular = bearing + Math.PI/2;
-		
-		double maxEscapeDistance = velocity * angularDirectionSignnum * time;
-		double maxRelEscapeX = maxEscapeDistance * Math.sin(perpendicular) + relX;
-		double maxRelEscapeY = maxEscapeDistance * Math.cos(perpendicular) + relY;
-		double maxEscapeAngle = Math.atan2(maxRelEscapeX, maxRelEscapeY);
-		
-		return maxEscapeAngle;
-	}
+
 	public static double normalizeAngle(double angle)
 	{
 		double pi = Math.PI;
