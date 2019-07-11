@@ -1,14 +1,8 @@
 package origin;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.awt.geom.Point2D;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-
-import gun.vGunAngle;
-import origin.SleepSiphon;
-
-import java.awt.geom.*;
+import java.util.HashMap;
 
 public class Util
 {
@@ -16,7 +10,7 @@ public class Util
 	private static double[] absoluteFieldBounds;
 
 	
-	public static Enemy getOldest(ConcurrentHashMap<String, Enemy> enemies, SleepSiphon self)
+	public static Enemy getOldest(HashMap<String, Enemy> enemies, SleepSiphon self)
 	{
 		String oldestName = "";
 		long oldestTime = 0;
@@ -32,7 +26,7 @@ public class Util
 		return enemies.get(oldestName);
 	}
 
-	public static String getOldestName(ConcurrentHashMap<String, Enemy> enemies, SleepSiphon self)
+	public static String getOldestName(HashMap<String, Enemy> enemies, SleepSiphon self)
 	{
 		String oldestName = "";
 		long oldestTime = 0;

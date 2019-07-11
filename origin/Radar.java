@@ -1,30 +1,29 @@
 package origin;
 
 import java.awt.geom.Point2D;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
 
-import origin.SleepSiphon;
 import robocode.Rules;
 
 public class Radar
 {
-	
+
 	public static void infinityLock(Enemy target, SleepSiphon self)
     {
         if (self.getRadarTurnRemaining() == 0)
             self.setTurnRadarRight(Double.POSITIVE_INFINITY);
     }
-	
+
 	public static void spinToCenter(SleepSiphon self)
 	{
 		if (self.getRadarTurnRemaining() == 0)
 		{
 			Point2D.Double center = Util.getFieldCenter();
 			double spinDirection = Math.signum( robocode.util.Utils.normalRelativeAngle(Math.atan2(center.getX()-self.getX(), center.getY()-self.getY()) - self.getRadarHeadingRadians()) );
-			self.setTurnRadarRight(Double.POSITIVE_INFINITY*spinDirection);	
+			self.setTurnRadarRight(Double.POSITIVE_INFINITY*spinDirection);
 		}
     }
-	
+
 	// not my code
 	public static void factorLock(Enemy target, SleepSiphon self)
 	{
@@ -35,13 +34,13 @@ public class Radar
 			self.setTurnRadarRightRadians( FACTOR * robocode.util.Utils.normalRelativeAngle(absBearing - self.getRadarHeadingRadians()) );
     	}
 	} //end of "not my code"
-	
+
 	//Actual oldest scanned
 	private static Enemy oldestScanned = null;
 	private static long oldestScannedAge = -1;
 	private static double turnAmountRemaining = 0;
 	private static long timeToScanAll = 1;
-	public static void oldestScanned(ConcurrentHashMap<String, Enemy> enemies, SleepSiphon self)
+	public static void oldestScanned(HashMap<String, Enemy> enemies, SleepSiphon self)
 	{
 		long currentTime = self.getTime();
 		String nOldestScannedName = Util.getOldestName(enemies, self);
@@ -69,8 +68,8 @@ public class Radar
 			double radarTurnToTarget = robocode.util.Utils.normalRelativeAngle(absBearing - self.getRadarHeadingRadians());
 			long timeSinceOldestScan = oldestScanned.getPreviousData().getAge(currentTime);
 			double mea = calcSimpleMEA(self.getPosition(), oldestScanned.getPosition(), Rules.MAX_VELOCITY, (int) Math.signum(radarTurnToTarget), timeSinceOldestScan);
-			
-			double turnAngle = robocode.util.Utils.normalRelativeAngle(mea - self.getRadarHeadingRadians()); //radarTurnToTarget; 
+
+			double turnAngle = robocode.util.Utils.normalRelativeAngle(mea - self.getRadarHeadingRadians()); //radarTurnToTarget;
 			turnAmountRemaining = Math.abs(turnAngle);
 			self.setTurnRadarRightRadians(turnAngle);
 
@@ -103,7 +102,7 @@ public class Radar
 
 		}
 
-	
+
 	}
 	public static double calcSimpleMEA(Point2D reference, Point2D target, double velocity, int angularDirectionSignnum, long time)
 	{
@@ -111,12 +110,12 @@ public class Radar
 		double relY = target.getY()-reference.getY();
 		double bearing = Math.atan2(relX, relY);
 		double perpendicular = bearing + Math.PI/2;
-		
+
 		double maxEscapeDistance = velocity * angularDirectionSignnum * time;
 		double maxRelEscapeX = maxEscapeDistance * Math.sin(perpendicular) + relX;
 		double maxRelEscapeY = maxEscapeDistance * Math.cos(perpendicular) + relY;
 		double maxEscapeAngle = Math.atan2(maxRelEscapeX, maxRelEscapeY);
-		
+
 		return maxEscapeAngle;
 	}
 	public static double calcSimpleMEA(Point2D reference, Point2D target, double velocity, double heading, long time)
@@ -127,15 +126,15 @@ public class Radar
 		double perpendicular = bearing + Math.PI/2;
 		double headingOffsetFromBearing = heading - bearing;
 		double lateralDirection = Math.signum(normalizeAngle(headingOffsetFromBearing));
-		
+
 		double maxEscapeDistance = velocity * lateralDirection * time;
 		double maxRelEscapeX = maxEscapeDistance * Math.sin(perpendicular) + relX;
 		double maxRelEscapeY = maxEscapeDistance * Math.cos(perpendicular) + relY;
 		double maxEscapeAngle = Math.atan2(maxRelEscapeX, maxRelEscapeY);
-		
+
 		return maxEscapeAngle;
 	}
-	
+
 
 	public static double normalizeAngle(double angle)
 	{
@@ -150,12 +149,12 @@ public class Radar
 		}
 		return angle;
 	}
-/*	public static void oldestScanned(ConcurrentHashMap<String, Enemy> enemies, SleepSiphon self)
+/*	public static void oldestScanned(HashMap<String, Enemy> enemies, SleepSiphon self)
 	{
 		Enemy target = Util.getOldest(enemies, self);
-		
-		
-		
+
+
+
 		final double FACTOR = Double.POSITIVE_INFINITY;
 		if (target != null)
     	{
@@ -167,15 +166,15 @@ public class Radar
 				double direction = robocode.util.Utils.normalRelativeAngle(absBearing - self.getRadarHeadingRadians());
 				self.setTurnRadarRightRadians( FACTOR * direction );
 			}
-			
+
     	}
 	}*/
-	
-/*	public static int oldestScanned(ConcurrentHashMap<String, Enemy> enemies, SleepSiphon self, int numScanned)
+
+/*	public static int oldestScanned(HashMap<String, Enemy> enemies, SleepSiphon self, int numScanned)
 	{
 		String oldestName = Util.getOldestName(enemies, self);
 		Enemy oldest = enemies.get(oldestName);
-				
+
 		final double FACTOR = 5;
 		if (oldest != null)
 		{
@@ -186,7 +185,7 @@ public class Radar
 				self.setTurnRadarRightRadians(FACTOR * turnAmount);
 				System.out.println(turnAmount);
 				numScanned = 0;
-			
+
 		}
 		else
 			System.out.println("Oldest is null");

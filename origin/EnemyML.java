@@ -3,7 +3,7 @@ package origin;
 import java.awt.geom.Point2D;
 import java.util.LinkedList;
 
-import util.Vector2D;
+import util.PositionedVector2D;
 
 public class EnemyML
 {
@@ -23,7 +23,7 @@ public class EnemyML
 		dataSet.add(e);
 	}
 	
-	private Vector2D[] getNearestNeighbors(int k, EnemyStateML cState)
+	private PositionedVector2D[] getNearestNeighbors(int k, EnemyStateML cState)
 	{
 		EDataDispVector[] kBest = new EDataDispVector[k];
 		double[] kBestDistances = new double[k];
@@ -55,7 +55,7 @@ public class EnemyML
 		}
 		
 		
-		Vector2D[] output = new Vector2D[k];
+		PositionedVector2D[] output = new PositionedVector2D[k];
 		for (int i = 0; i < k; i++)
 		{
 			output[i] = kBest[i].getVector();
@@ -73,7 +73,7 @@ public class EnemyML
 				enemy.getTimeSinceDecel());
 		//double angle = 0;
 		int NUM_NEIGHBORS = 1; //idk how to do bucketing.  Probably just going to use the "weight by distance" method.  For now, just using nearest.
-		Vector2D[] nearestNeighbors = getNearestNeighbors(NUM_NEIGHBORS, cState);
+		PositionedVector2D[] nearestNeighbors = getNearestNeighbors(NUM_NEIGHBORS, cState);
 		Point2D.Double predictedRelPos = nearestNeighbors[0].project();
 		Point2D.Double predictedAbsPos = new Point2D.Double(predictedRelPos.getX() + enemy.getX(), predictedRelPos.getY() + enemy.getY());
 		return predictedAbsPos;

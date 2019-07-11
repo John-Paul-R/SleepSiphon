@@ -2,13 +2,11 @@ package gun;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.util.LinkedList;
 
 import origin.BotData;
 import origin.Enemy;
 import origin.Util;
 import robocode.Rules;
-import util.TimedPoint;
 
 public class enemyGunSim 
 {

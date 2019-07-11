@@ -5,7 +5,7 @@ public class SelfData implements BotData
     private double gunHeading; // Absolute, non-normalized (between 0 & 2pi)
     private double heading;
     private double velocity;
-    private long time;  //Time is now the 'key' value for the ConcurrentHashMap
+    private long time;  //Time is now the 'key' value for the HashMap
     private double x;
     private double y;
     private double prevHeading;

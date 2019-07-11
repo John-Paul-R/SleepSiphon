@@ -3,7 +3,7 @@ package origin;
 import java.awt.geom.Point2D;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
 
 import origin.SleepSiphon;
 import robocode.Bullet;
@@ -14,10 +14,10 @@ public class Gun
 	private SleepSiphon self;
 	private LinkedList<Bullet> bullets;
 	private LinkedList<SelfWave> selfWaves;
-	private ConcurrentHashMap<String, Enemy> enemies;
+	private HashMap<String, Enemy> enemies;
 	HashMap<String, EnemyML> enemiesml;
 	
-	public Gun(SleepSiphon s, LinkedList<Bullet> b, LinkedList<SelfWave> sw, ConcurrentHashMap<String, Enemy> enemies, HashMap<String, EnemyML> enemiesml)
+	public Gun(SleepSiphon s, LinkedList<Bullet> b, LinkedList<SelfWave> sw, HashMap<String, Enemy> enemies, HashMap<String, EnemyML> enemiesml)
 	{
 		self = s;
 		bullets = b;

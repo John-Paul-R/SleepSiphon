@@ -1,19 +1,18 @@
 package origin;
 
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
 
-import util.Vector2D;
+import util.PositionedVector2D;
 
 public class SelfWave extends Wave
 {
 	private long aliveTime;
 	private static long maxAliveTime;
-	private ConcurrentHashMap<String, Enemy> enemies;
+	private HashMap<String, Enemy> enemies;
 	private HashMap<String, EnemyML> enemiesml;
 	
 	private HashMap<String, EnemyStateML> eStartStates;
@@ -21,7 +20,7 @@ public class SelfWave extends Wave
 	
 	private boolean remove;
 	
-	public SelfWave(double centerX, double centerY, long startTime, double bulletPower, ConcurrentHashMap<String, Enemy> enemies, HashMap<String, EnemyML> enemiesml)
+	public SelfWave(double centerX, double centerY, long startTime, double bulletPower, HashMap<String, Enemy> enemies, HashMap<String, EnemyML> enemiesml)
 	{
 		super(centerX, centerY, startTime, bulletPower);
 		remove = false;
@@ -79,7 +78,7 @@ public class SelfWave extends Wave
 				{
 					//System.out.println(this.toString());
 					//System.out.println("updating enemy ml data for " + uncrashedEnemy);
-					Vector2D dVector = new Vector2D(eStartLocs.get(uncrashedEnemy), cEnemy.getLocation());
+					PositionedVector2D dVector = new PositionedVector2D(eStartLocs.get(uncrashedEnemy), cEnemy.getLocation());
 					enemiesml.get(uncrashedEnemy).addData(new EDataDispVector(eStartStates.get(uncrashedEnemy), dVector));
 					iterator.remove();
 				}

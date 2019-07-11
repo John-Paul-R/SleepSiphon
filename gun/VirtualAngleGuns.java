@@ -2,9 +2,8 @@ package gun;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.geom.Point2D;
 import java.util.LinkedList;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
 
 import origin.Aim;
 import origin.Enemy;
@@ -13,22 +12,21 @@ import origin.Util;
 import origin.WeightedPoint;
 import robocode.Rules;
 import util.TimedPoint;
-import util.Vector2D;
 
-public class VirtualAngleGuns 
+public class VirtualAngleGuns
 {
 	//Numeric ID for each gun ([0 : Head-On] [1 : Linear Prediction] [2 : Turn Predict] [3 : AvgVel&Heading])
 	//private static final int HEAD_ON = 0, LINEAR = 1, TURN_BASIC = 2, AVG_VH = 3;
 	private static final int numGuns = 4;
-	private ConcurrentHashMap<String, Enemy> enemyMap;
+	private HashMap<String, Enemy> enemyMap;
 	private SleepSiphon self;
-	
-	public VirtualAngleGuns(SleepSiphon s, ConcurrentHashMap<String, Enemy> e)
+
+	public VirtualAngleGuns(SleepSiphon s, HashMap<String, Enemy> e)
 	{
 		self = s;
 		enemyMap = e;
 	}
-	
+
 	public void updateEnemy(Enemy target)
 	{
 		long currentTime = self.getTime();
@@ -42,7 +40,7 @@ public class VirtualAngleGuns
 			{
 				BulletVector cBulletVector = vBullets.get(i);
 				//if (cBulletVector.getTime() == target.getTime())//if it is the time that the bullet was predicted to impact
-				
+
 				double rad = cBulletVector.getLengthAtTime(currentTime);
 				double eDistFromBulletStart = cBulletVector.getStartPos().distance(target.getPosition());
 				WeightedPoint projectedBulletLoc = new WeightedPoint(cBulletVector.projectByRad(rad));
@@ -52,14 +50,14 @@ public class VirtualAngleGuns
 					target.updateGunStat(enemyGunSim.checkForHit(projectedBulletLoc, target), cBulletVector.getGunID());
 					cWeight += .9;
 					//System.out.println("Updated Gun " + cBulletVector.getGunID() + " for " + target);
-	
+
 				}
 				vBulletLocs.add(projectedBulletLoc);
 				projectedBulletLoc.setWeight(cWeight);
-	
+
 	/*				vBullets.remove(cBulletVector);//Remove bullet
 					i-=1;*/
-				
+
 				if (projectedBulletLoc.getWeight() == 1 || cBulletVector.getAge(currentTime) > 100)
 				{
 					vBullets.remove(cBulletVector);//Remove bullet
@@ -68,7 +66,7 @@ public class VirtualAngleGuns
 			}
 		}
 	}
-	
+
 	public void updateAll()
 	{
 		vBulletLocs = new LinkedList<WeightedPoint>();
@@ -78,7 +76,7 @@ public class VirtualAngleGuns
 			updateEnemy(enemy);
 		}
 	}
-	
+
 	public void virtualFireAll()
 	{
 		for (Enemy enemy : enemyMap.values())
@@ -103,17 +101,32 @@ public class VirtualAngleGuns
 		BulletVector bulletVector = null;
 		switch (gunID)
 		{
-		case 0 : bulletVector = new BulletVector(selfTimedPos, vGunAngle.headOn(selfTimedPos, target, BULLET_POWER), BULLET_SPEED, gunID);
-		break;
-		case 1 : bulletVector = new BulletVector(selfTimedPos, vGunAngle.linearPredictionFire(selfTimedPos, target, BULLET_POWER), BULLET_SPEED, gunID);
-		break;
-		case 2 : bulletVector = new BulletVector(selfTimedPos, vGunAngle.constantTurnPredict(selfTimedPos, target, BULLET_POWER), BULLET_SPEED, gunID);
-		break;
-		case 3 : bulletVector = new BulletVector(selfTimedPos, vGunAngle.averageMovementGun(selfTimedPos, target, BULLET_POWER), BULLET_SPEED, gunID);
-		break;
+            case 0 : bulletVector = new BulletVector(selfTimedPos, vGunAngle.headOn(selfTimedPos, target, BULLET_POWER), BULLET_SPEED, gunID);
+            break;
+            case 1 : bulletVector = new BulletVector(selfTimedPos, vGunAngle.linearPredictionFire(selfTimedPos, target, BULLET_POWER), BULLET_SPEED, gunID);
+            break;
+            case 2 : bulletVector = new BulletVector(selfTimedPos, vGunAngle.constantTurnPredict(selfTimedPos, target, BULLET_POWER), BULLET_SPEED, gunID);
+            break;
+            case 3 : bulletVector = new BulletVector(selfTimedPos, vGunAngle.averageMovementGun(selfTimedPos, target, BULLET_POWER), BULLET_SPEED, gunID);
+            break;
 		}
 		return bulletVector;
-	}
+    }
+    public static String gunNameFromID(int gunID) {
+        String out = null;
+        switch (gunID)
+		{
+            case 0 : out = "Head-On";
+            break;
+            case 1 : out = "Linear";
+            break;
+            case 2 : out = "Circular";
+            break;
+            case 3 : out = "Average";
+            break;
+        }
+        return out;
+    }
 	private LinkedList<WeightedPoint> vBulletLocs = new LinkedList<WeightedPoint>();
 	public void onPaint(Graphics2D g, boolean enabled)
 	{

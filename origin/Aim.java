@@ -1,9 +1,7 @@
 package origin;
 
 import java.awt.geom.Point2D;
-import java.util.concurrent.ConcurrentHashMap;
 
-import origin.SleepSiphon;
 import robocode.Rules;
 
 public class Aim

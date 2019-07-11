@@ -1,13 +1,10 @@
 package origin;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
 import gun.BulletVector;
 import gun.VirtualBullet;
-import robocode.Robot;
-import util.Vector2D;
 public class Enemy
 {
 	private static final int BOT = 36;

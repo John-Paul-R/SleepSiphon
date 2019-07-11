@@ -2,11 +2,8 @@ package origin;
 
 import java.awt.geom.Point2D;
 
-import gun.vGunAngle;
-import gun.vGunPoint;
-import util.TimedPoint;
-import gun.VirtualBullet;
 import gun.enemyGunSim;
+import util.TimedPoint;
 
 public class EnemyWave extends Wave
 {

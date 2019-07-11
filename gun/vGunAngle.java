@@ -3,7 +3,6 @@ package gun;
 import java.awt.geom.Point2D;
 
 import origin.Analysis;
-import origin.BotData;
 import origin.Enemy;
 import origin.Util;
 import robocode.Rules;

@@ -2,95 +2,64 @@ package util;
 
 import java.awt.geom.Point2D;
 
-public class Vector2D extends Point2D
-{
-	Point2D startPos;
-	private double angle; //in radians
-	private double magnitude;
-	
-	public Vector2D(Point2D startPos, double a, double m)
-	{
-		this.startPos = new Point2D.Double(startPos.getX(), startPos.getY());
-		angle = a;
-		magnitude = m;
-	}
-	
-	public Vector2D(Point2D startPos, Point2D endPos)
-	{
-		this.startPos = startPos;
-		angle = Math.atan2(endPos.getX()-startPos.getX(), endPos.getY()-startPos.getY());;
-		magnitude = startPos.distance(endPos);
-		
-	}
-	public Vector2D(double a, double m)
-	{
-		angle = a;
-		magnitude = m;
-	}
-	
-	//TODO implement this
-/*	public static Vector2D vectorSum(Vector2D[] addends)
-	{
-		int numTerms = addends.length;
-		for (int i = 0; i < numTerms; i++)
-		{
-			
-		}
-	}*/
-	
-	public Point2D getStartPos()
-	{
-		return new Point2D.Double(startPos.getX(), startPos.getY());
-	}
-	
-	public double getAngle()
-	{
-		return angle;
-	}
-	
-	public double getMagnitude()
-	{
-		return magnitude;
-	}
-	public void setMagnitude(double m)
-	{
-		magnitude = m;
-	}
-	public void scaleMagnitude(double scaleFactor)
-	{
-		magnitude *= scaleFactor;
-	}
-	
-	public Point2D.Double project()
-	{
-		return new Point2D.Double(
-				Math.sin(angle)*magnitude,
-				Math.cos(angle)*magnitude);
-	}
-	public Point2D.Double projectFromStartPos(double scaleFactor)
-	{
-		return new Point2D.Double(
-				startPos.getX()+Math.sin(angle)*magnitude*scaleFactor,
-				startPos.getY()+Math.cos(angle)*magnitude*scaleFactor);
-	}
-	
-	
-	@Override
-	public double getX() 
-	{
-		return startPos.getX();
-	}
+public class Vector2D {
 
-	@Override
-	public double getY()
-	{
-		return startPos.getY();
-	}
+    private double x;
+    private double y;
+    private double angle;
+    private double magnitude;
 
-	@Override
-	public void setLocation(double arg0, double arg1) 
-	{
-		startPos = new Point2D.Double(arg0, arg1);
-	}
+    public Vector2D() {
+        this.x = 0;
+        this.y = 0;
+        this.angle = 0;
+        this.magnitude = 0;
+    }
+    public Vector2D(Point2D xyComponents) {
+        this.x = xyComponents.getX();
+        this.y = xyComponents.getY();
 
+        this.angle = Math.atan2(y, x);
+        this.magnitude = Math.sqrt(x*x + y*y);
+    }
+    public Vector2D(double angle, double magnitude) {
+        
+        this.angle = angle;
+        this.magnitude = magnitude;
+
+        this.x = magnitude*Math.cos(angle);
+        this.y = magnitude*Math.sin(angle);
+    }
+
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public void setX(double x) {
+        this.x = x;
+    }
+
+    public void setY(double y) {
+        this.y = y;
+    }
+
+    public double getAngle() {
+        return angle;
+    }
+
+    public void setAngle(double angle) {
+        this.angle = angle;
+    }
+
+    public double getMagnitude() {
+        return magnitude;
+    }
+
+    public void setMagnitude(double magnitude) {
+        this.magnitude = magnitude;
+    }
 }

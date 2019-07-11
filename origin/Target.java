@@ -1,11 +1,11 @@
 package origin;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
 
 public class Target
 {
-	public static String closest(ConcurrentHashMap<String, Enemy> enemies)
+	public static String closest(HashMap<String, Enemy> enemies)
     {
         String cClosestName = "";
         double cClosestDist = Integer.MAX_VALUE;

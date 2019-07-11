@@ -6,9 +6,8 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
 
-import origin.SleepSiphon;
 import robocode.Rules;
 import util.TimedWeightedPoint;
 
@@ -406,7 +405,7 @@ public class Analysis
 		}
 	}
 	
-	public static Ellipse2D.Double[] enemyDistToClosestCircles(ConcurrentHashMap<String, Enemy> enemies)
+	public static Ellipse2D.Double[] enemyDistToClosestCircles(HashMap<String, Enemy> enemies)
     {
     	Ellipse2D.Double[] circles = new Ellipse2D.Double[enemies.size()];
     	int i = 0;

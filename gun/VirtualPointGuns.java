@@ -1,7 +1,7 @@
 package gun;
 
 import java.util.LinkedList;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
 
 import origin.Aim;
 import origin.Enemy;
@@ -13,10 +13,10 @@ public class VirtualPointGuns
 	//Numeric ID for each gun ([0 : Head-On] [1 : Linear Prediction] [2 : Turn Predict] [3 : AvgVel&Heading])
 	//private static final int HEAD_ON = 0, LINEAR = 1, TURN_BASIC = 2, AVG_VH = 3;
 	private static final int numGuns = 4;
-	private ConcurrentHashMap<String, Enemy> enemyMap;
+	private HashMap<String, Enemy> enemyMap;
 	private SleepSiphon self;
 	
-	public VirtualPointGuns(SleepSiphon s, ConcurrentHashMap<String, Enemy> e)
+	public VirtualPointGuns(SleepSiphon s, HashMap<String, Enemy> e)
 	{
 		self = s;
 		enemyMap = e;

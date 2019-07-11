@@ -11,7 +11,7 @@ public class BulletVector extends Point2D
 	private double magnitude;
 	private long time;
 	private int gunID;
-	
+
 	public BulletVector(TimedPoint startPos, double a, double m, int gID)
 	{
 		this.startPos = new Point2D.Double(startPos.getX(), startPos.getY());
@@ -20,7 +20,7 @@ public class BulletVector extends Point2D
 		time = startPos.getTime();
 		gunID = gID;
 	}
-	
+
 	public BulletVector(TimedPoint startPos, Point2D endPos, int gID)
 	{
 		this.startPos = startPos;
@@ -29,27 +29,27 @@ public class BulletVector extends Point2D
 		time = startPos.getTime();
 		gunID = gID;
 	}
-	
+
 	//TODO implement this
 /*	public static Vector2D vectorSum(Vector2D[] addends)
 	{
 		int numTerms = addends.length;
 		for (int i = 0; i < numTerms; i++)
 		{
-			
+
 		}
 	}*/
-	
+
 	public Point2D getStartPos()
 	{
 		return new Point2D.Double(startPos.getX(), startPos.getY());
 	}
-	
+
 	public double getAngle()
 	{
 		return angle;
 	}
-	
+
 	public double getMagnitude()
 	{
 		return magnitude;
@@ -62,7 +62,7 @@ public class BulletVector extends Point2D
 	{
 		magnitude *= scaleFactor;
 	}
-	
+
 	public Point2D.Double project()
 	{
 		return new Point2D.Double(
@@ -89,10 +89,10 @@ public class BulletVector extends Point2D
 	{
 		return gunID;
 	}
-	
-	
+
+
 	@Override
-	public double getX() 
+	public double getX()
 	{
 		return startPos.getX();
 	}
@@ -104,7 +104,7 @@ public class BulletVector extends Point2D
 	}
 
 	@Override
-	public void setLocation(double arg0, double arg1) 
+	public void setLocation(double arg0, double arg1)
 	{
 		startPos = new Point2D.Double(arg0, arg1);
 	}

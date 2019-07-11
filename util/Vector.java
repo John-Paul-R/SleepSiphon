@@ -34,7 +34,7 @@ public class Vector
 	public double getVerticalComponent() {return magnitude * Math.sin(direction);}
 	public double getHorizontalComponent() {return magnitude * Math.cos(direction);}
 
-	public void setMagnitude(double m) 
+	public void setMagnitude(double m)
 	{
 		magnitude = m;
 	}
