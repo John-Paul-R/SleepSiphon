@@ -62,7 +62,7 @@ public class Gun
     }
     
 	//Aiming/Prediction algorithms
-	public void basic(Enemy target, double BULLET_POWER)
+	public Point2D.Double fireHeadOn(Enemy target, double BULLET_POWER)
     {
     	if (self.getGunTurnRemaining() == 0)
     	{
@@ -72,7 +72,8 @@ public class Gun
 	        	self.setTurnGunRightRadians(robocode.util.Utils.normalRelativeAngle(targetAbsoluteBearing - self.getGunHeadingRadians()));
 	        	setFireBullet(BULLET_POWER);
 	    	}
-    	}
+        }
+        return target.getLocation();
     }
     
     //LINEAR PREDICTION (MY CODE & MATH)

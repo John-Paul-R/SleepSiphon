@@ -67,7 +67,7 @@ public class Radar
 			double absBearing = Math.atan2(relX, relY);
 			double radarTurnToTarget = robocode.util.Utils.normalRelativeAngle(absBearing - self.getRadarHeadingRadians());
 			long timeSinceOldestScan = oldestScanned.getPreviousData().getAge(currentTime);
-			double mea = calcSimpleMEA(self.getPosition(), oldestScanned.getPosition(), Rules.MAX_VELOCITY, (int) Math.signum(radarTurnToTarget), timeSinceOldestScan);
+			double mea = calcSimpleMEA(self.getLocation(), oldestScanned.getPosition(), Rules.MAX_VELOCITY, (int) Math.signum(radarTurnToTarget), timeSinceOldestScan);
 
 			double turnAngle = robocode.util.Utils.normalRelativeAngle(mea - self.getRadarHeadingRadians()); //radarTurnToTarget;
 			turnAmountRemaining = Math.abs(turnAngle);

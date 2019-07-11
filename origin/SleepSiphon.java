@@ -61,26 +61,20 @@ public class SleepSiphon extends AdvancedRobot
     private move.MoveActor mover;
     private WaveManager waveMgr;
 
-	private int totalNumEnemies;
     private int knownEnemies = 0;
     private HashMap<String, Enemy> currentEnemies;
     private LinkedList<SelfData> selfDataHistory;
 
     private int radarMode = 3;
     private int targetMode = 0; //ADD THIS IN FUTURE for different target selection algorithms
-    private int moveMode = 9000;
     //private int aimMode = 5;  //REPLACED BY VIRTUAL GUNS (PER ENEMY)
     //private int fireMode = 0; //Not yet implemented
     private String cTargetName = "";
     private Enemy cTargetEnemy;
-    private int[] destinationXY = null;
-    //global constants
-    private boolean is1v1 = false;
 
     private Point2D.Double predictedEnemyPoint = null;
     private double[] predictedEnemyPointAtTime = new double[] {0,0,-1};
     private double[] circleCenter = new double[2];
-    private WeightedPoint[] destinationPoints = null;
 
     private int NUM_GUNS = 4;
     //private VirtualPointGuns vPointGuns;
@@ -90,13 +84,6 @@ public class SleepSiphon extends AdvancedRobot
 	private boolean fileOutput = false;
 
 	private LinkedList<EnemyWave> eWaves = new LinkedList<EnemyWave>();
-	private int pointsPerWave = 3; //TODO : Rework this
-
-	//Min Risk Paths
-	private Point2D.Double[] destinations = null;
-	private TimedWeightedPoint[][] paths = null;
-	private Point2D bestDestinationPoint = null;
-	private double[] pathRisks = null;
 
 	private static boolean gunToggle = true;
 
@@ -112,6 +99,7 @@ public class SleepSiphon extends AdvancedRobot
     private RobocodeFileOutputStream debugWriter;
     private static HashMap<String, int[][]> bulletHitStats = new HashMap<String, int[][]>();;//Dim 1 is each gun type. Dim 2 index 0 is number of hits for that gun type, Dim 2 index 1 is number fired for that gun type.
     private int moveWait = 0;
+
     public HashMap<String, Enemy> getEnemies() {
         return this.currentEnemies;
     }
@@ -129,7 +117,6 @@ public class SleepSiphon extends AdvancedRobot
         mover = new move.MoveActor(this);
         mover.setMoveMode(1);
         waveMgr = new WaveManager(this);
-		totalNumEnemies = getOthers();
 		setAdjustRadarForGunTurn(true);
 		setAdjustRadarForRobotTurn(true);
 		setAdjustGunForRobotTurn(true);
@@ -199,10 +186,9 @@ public class SleepSiphon extends AdvancedRobot
     						getTime(),
     						prevHeading));
     		prevHeading = getHeadingRadians();
-    		if (getOthers() == 1)
-    			is1v1 = true;
-    		//Update SelfWaves
-    		if (getOthers() > 0)
+                
+            //Update SelfWaves
+    		if (getOthers() > 0) {
 	    		for (int i = 0; i < selfWaves.size(); i++)
 	    		{
 	    			SelfWave sWave = selfWaves.get(i);
@@ -216,112 +202,80 @@ public class SleepSiphon extends AdvancedRobot
 	    				sWave.update(currentTime);//This also updates the EnemyML objects (based on their movement relative to my waves (disp vectors))
 	    			}
 	    		}
+            }
 
-
+            //Gun
             if (cTargetEnemy != null && gunToggle)
             {
-            	/*double BULLET_POWER = Aim.firePowerByDist(this, cTargetEnemy);
-            	if (aimMode == 0)
-            		Aim.basic(this, cTargetEnemy);
-            	else if (aimMode == 1)
-            	{
-            		predictedEnemyPointAtTime = Aim.linearPredictionFire(this, cTargetEnemy, BULLET_POWER);
-            	}
-            	else if (aimMode == 2)
-            	{
-            		predictedEnemyPoint = Aim.constantTurnPredict(this, cTargetEnemy, BULLET_POWER);
-
-            	}
-            	else if (aimMode == 100)
-            	{
-            		if (Util.withinTolerance(0.0, Analysis.predictConstantTurn(this, cTargetEnemy), 0.01))
-            		{
-            			//System.out.println(cTarget + " is LINEAR");
-            			predictedEnemyPointAtTime = Aim.linearPredictionFire(this, cTargetEnemy, BULLET_POWER);
-            		}
-            		else
-            		{
-            			//System.out.println(cTarget + " is CIRCLE");
-            			predictedEnemyPointAtTime[2] = -1;
-            			predictedEnemyPoint = Aim.predictCircle(this, cTargetEnemy);
-            		}
-            	}
-            	else if (aimMode == 5)
-            	{
-            		predictedEnemyPoint = Aim.averageMovementGun(this, cTargetEnemy, BULLET_POWER);
-            	}
-
-                //if gun has finished aiming, fire projectile and update current target
-                if (getGunTurnRemaining() <= (1.0/8.0)*Math.PI)
-                {
-                	if (fireMode == 0 && cTargetEnemy != null)
-                		setFireBullet(BULLET_POWER);
-
-                }*/
             	//TODO REIMPLEMENT THIS
-            	//vPointGuns.virtualFireAll();//TODO Use the most recent predicted point from the vgun to fire bullet, that way there is no unnecessary recalculation?
-            	//vPointGuns.updateAll();
+            	//TODO Use the most recent predicted point from the vgun to fire bullet, that way there is no unnecessary recalculation?
             	vAngleGuns.virtualFireAll();
             	vAngleGuns.updateAll();
-            	double BULLET_POWER = Aim.firePowerByDist(this, cTargetEnemy);
-            	if (getEnergy() < 0.2)
-            	{
-            		BULLET_POWER = 0;
-            	}
-            	else if (getEnergy() <= 5)
-            	{
-            		BULLET_POWER = .1;
-            	}
-            	else if (getEnergy() <= 15)
-            	{
-            		BULLET_POWER *= .2;
-            	}
-            	else if (getEnergy() <= 20)
-            	{
-            		BULLET_POWER *= .3;
-            	}
-            	else if (getEnergy() <= 25)
-            	{
-            		BULLET_POWER *= .6;
-            	}
-            	else if (getEnergy() >= 80)
-            	{
+                double BULLET_POWER = Aim.firePowerByDist(this, cTargetEnemy);
+                double energy = this.getEnergy();
+            	if (energy < 0.2) {
+                    BULLET_POWER = 0;
+                    
+            	} else if (energy <= 5) {
+                    BULLET_POWER = .1;
+                    
+            	} else if (energy <= 15) {
+                    BULLET_POWER *= .2;
+                    
+            	} else if (energy <= 20) {
+                    BULLET_POWER *= .3;
+                    
+            	} else if (energy <= 25) {
+                    BULLET_POWER *= .6;
+                    
+            	} else if (energy >= 80) {
             		BULLET_POWER *= 2;
-            	}
+                }
+                
             	//System.out.println(cTargetName + "\t\t" + cTargetEnemy.getBestGunHitRate());
-            	boolean disabledEnemy = false;
+            	boolean existsDisabledEnemy = false;
             	for (Enemy cEnemy : currentEnemies.values())
             	{
 	            	if (cEnemy.getEnergy() == 0)
 	            	{
-	            			gunActor.basic(cEnemy, 0.1);
-	            			disabledEnemy = true;
+	            			gunActor.fireHeadOn(cEnemy, 0.1);
+	            			existsDisabledEnemy = true;
 	            			//System.out.println("NOT Firing Based on ML Data");
 	            	}
-            	}
-            	if (!disabledEnemy && BULLET_POWER > 0)
+                }
+                
+            	if (!existsDisabledEnemy && BULLET_POWER > 0)
             	{
             		if (currentTime > 70 || this.getNumRounds() > 1 && cTargetEnemy.getBestGunHitRate() >= 0.15)
 	            	{
             			if (getGunHeat() == 0)
             			{
-	                	System.out.println(String.format("[%d] %s", currentTime, ("Firing at " + cTargetName + " With vGuns")));
+                            System.out.println( String.format("[%d] %s", currentTime,
+                                ("Firing at " + cTargetName + " with "
+                                + VirtualAngleGuns.gunNameFromID(cTargetEnemy.getBestGun()))) );
             			}
 	            		predictedEnemyPointAtTime = null;
 	                	switch (cTargetEnemy.getBestGun())
 	                	{
-	                	case 0 : gunActor.basic(cTargetEnemy, BULLET_POWER);
+                        case 0 :
+                            predictedEnemyPoint = gunActor.fireHeadOn(cTargetEnemy, BULLET_POWER);
+                            predictedEnemyPointAtTime= null;
 	                	break;
-	                	case 1 : predictedEnemyPointAtTime = gunActor.linearPredictionFire(cTargetEnemy, BULLET_POWER); predictedEnemyPoint= null;
-	                	break;
-	                	case 2 : predictedEnemyPoint = gunActor.constantTurnPredict(cTargetEnemy, BULLET_POWER);
-	                	break;
-	                	case 3 : predictedEnemyPoint = gunActor.averageMovementGun(cTargetEnemy, BULLET_POWER);
-	                	break;
+                        case 1 :
+                            predictedEnemyPointAtTime = gunActor.linearPredictionFire(cTargetEnemy, BULLET_POWER);
+                            predictedEnemyPoint= null;
+	                	    break;
+                        case 2 :
+                            predictedEnemyPoint = gunActor.constantTurnPredict(cTargetEnemy, BULLET_POWER); predictedEnemyPoint= null;
+                            predictedEnemyPointAtTime= null;
+                            break;
+                        case 3 :
+                            predictedEnemyPoint = gunActor.averageMovementGun(cTargetEnemy, BULLET_POWER);
+                            predictedEnemyPointAtTime= null;
+                            break;
 	                	}
-	            	}
-	        		else if (enemiesml.get(cTargetName) != null && enemiesml.get(cTargetName).dataSet.size() > 5)
-	            	{
+	            	} else if (enemiesml.get(cTargetName) != null && enemiesml.get(cTargetName).dataSet.size() > 5) {
+                        
 	            		predictedEnemyPoint = Util.limitCoordinateToMap(enemiesml.get(cTargetName).getPredictedCoordinate(new Point2D.Double(getX(), getY()), cTargetEnemy));
 	            		gunActor.aimToCoordinate(predictedEnemyPoint);
 	            		if (getGunHeat() == 0)
@@ -338,10 +292,7 @@ public class SleepSiphon extends AdvancedRobot
             	}
             }
 
-            //else
-            	//System.out.println("cTargetEnemy is null!");
-
-
+            //Targeting
             if (getGunHeat() > 0.5)
             {
        			//Set current target
@@ -351,82 +302,7 @@ public class SleepSiphon extends AdvancedRobot
             		System.out.println("THE IMPOSSIBLE HAS HAPPENED");
             	cTargetEnemy = currentEnemies.get(cTargetName);
             }
-
-
-            if ((is1v1 || moveMode==9000) && moveMode >= 0)
-            {
-            	
-                waveMgr.updateWaves();
-            	
-        		if ((is1v1 || moveMode == 9000) && cTargetEnemy != null)
-        		{
-        			double minDistance = 20;
-        			destinations = MoveActor.generatePointsCircular(new Point2D.Double(getX(), getY()), 16, 150);
-        			//destinations = Move.removeCloseCoordinates(destinations, minDistance);
-        	    	paths = MoveActor.generatePaths(this, destinations);
-
-        	    	double[] pathRisks_wave = Analysis.calcPathRisksByDist_WAVE(paths, eWaves, pointsPerWave, getTime());
-        	    	double[] pathRisks_bot = Analysis.calcPathRisksByDist_BOT(paths, cTargetEnemy.getLatest(), getTime());
-        	    	Analysis.calcPath_repelWalls(paths);
-        	    	//Analysis.calcPath_NearBot(paths, cTargetEnemy);
-        	    	double[] pathRepelCorners = Analysis.calcPath_repelCorners(paths);
-        	    	pathRisks = Analysis.getPathRisks(paths);
-        	    	//pathRisks = Analysis.sumDoubleArrays(pathRisks_wave, pathRisks_bot);//this updates the risk ("Weight") of each point as well
-        	    	//pathRisks = Analysis.sumDoubleArrays(pathRisks, pathRepelCorners);
-        	    	bestDestinationPoint = destinations[Analysis.getSafestPathIndex(pathRisks)];
-        	    	MoveActor.aGoTo(this, bestDestinationPoint.getX(), bestDestinationPoint.getY());
-        		}
-
-            }
-            //else
-            if (moveWait == 0)
-            {
-	            switch (moveMode)
-	            {
-		            case 0 :
-		            	MoveActor.random(this);
-		            	break;
-		            case 1 :
-		            	setMaxVelocity(5);
-		        		MoveActor.spin(this);
-		        		break;
-		            case 2 :
-
-		            	break;
-		            case 3 :
-		            	if (getOthers() > 1)
-		            		destinationPoints = MoveActor.fourCornersLoose(this);
-		            	else
-		            	{
-		            		moveMode = 4;
-		            		destinationXY = null;
-		            	}
-		            	break;
-		            case 4 :
-		            	if (cTargetEnemy != null)
-		            		destinationPoints = MoveActor.circularPointDistribution(this, cTargetEnemy);
-		            	break;
-		            case 5 : //CURRENT
-		            	if (getOthers() > 4)
-		            	{
-		            		final double HYPOT = 150;
-		            		destinationPoints = MoveActor.circleDistribution_NeverClosest2(this, closestDistCircles, currentEnemies, HYPOT);
-		            	}
-		            	else
-		            	{
-		            		moveMode = 9000;
-		            		//is1v1 = true;
-		            		destinationPoints = null;
-		            		destinationXY = null;
-		            	}
-	            	break;
-	            }
-            }
-	        else
-	        {
-	        	moveWait -= 1;
-	        }
-            //targeting
+            //Radar
             if (cTargetName != null)
             {
 	            switch (radarMode)
@@ -436,46 +312,41 @@ public class SleepSiphon extends AdvancedRobot
 	            case 1 : Radar.infinityLock(cTargetEnemy, this);
 	            	break;
 	            case 2 : Radar.factorLock(cTargetEnemy, this);
-	            	break;
+                    break;
+                case 3 :
+                    if (currentEnemies.size() < getOthers() || cTargetEnemy == null)
+                    {
+                        Radar.spinToCenter(this);
+                        System.out.print(String.format("[%d] URS ||", currentTime));
+
+                    }
+                    else if (getOthers() > 1)
+                    {
+                        Radar.oldestScanned(currentEnemies, this);
+                        //System.out.println(Util.getOldestName(currentEnemies, this));
+                    }
+                    else
+                    {
+                        if (cTargetEnemy != null)
+                        {
+                            if (cTargetEnemy.timeSinceUpdate((int)getTime()) > 8)
+                                Radar.spinToCenter(this);
+                            else
+                                Radar.factorLock(cTargetEnemy, this);
+                        }
+
+                    }
+                    break;
 	            }
             }
 
-            if (radarMode == 3)
-            {
-            	if (currentEnemies.size() < getOthers() || cTargetEnemy == null)
-            	{
-            		Radar.spinToCenter(this);
-            		System.out.print(String.format("[%d] URS ||", currentTime));
-
-            	}
-            	else if (getOthers() > 1)
-            	{
-            		Radar.oldestScanned(currentEnemies, this);
-            		//System.out.println(Util.getOldestName(currentEnemies, this));
-            	}
-            	else
-            	{
-                    if (cTargetEnemy != null)
-                    {
-	            		if (cTargetEnemy.timeSinceUpdate((int)getTime()) > 8)
-	            			Radar.spinToCenter(this);
-	            		else
-	            			Radar.factorLock(cTargetEnemy, this);
-                    }
-
-            	}
-            }
-            else if (radarMode == 0)
-            {
-            	Radar.spinToCenter(this);
-            }
-
+            waveMgr.updateWaves();
             mover.execute();
             execute();
 		}
 	}
 
-	public Point2D.Double getPosition()
+	public Point2D.Double getLocation()
 	{
 		return new Point2D.Double(this.getX(), this.getY());
 	}
@@ -548,9 +419,7 @@ public class SleepSiphon extends AdvancedRobot
 
 			}
 
-		}
-		else
-		{
+		} else {
 			EnemyData cEnemyLastData = currentEnemies.get(e.getName()).getLatest();
 
 			currentEnemies.get(e.getName()).addEnemyData(new EnemyData(
@@ -569,13 +438,7 @@ public class SleepSiphon extends AdvancedRobot
 					scanOrder));
 			currentEnemies.get(e.getName()).setUpdatedWaves(false);
 
-		}
-
-
-
-		//Waves
-		/*if (e.getEnergy() )
-        currentEnemies.get(e.getName()).addWave()*/
+        }
         
 	}
 
@@ -664,37 +527,33 @@ public class SleepSiphon extends AdvancedRobot
     private static boolean showMenu = false;
     public void onKeyPressed(KeyEvent e)
     {
+        latestEightKeys = latestEightKeys.substring(1) + e.getKeyChar();
+        char keyChar = e.getKeyChar();
+    	if (keyChar == 'd') {
+            showDistanceCircles = !showDistanceCircles;
+            
+    	} else if (keyChar == 'w') {
+            showEnemyWaves = !showEnemyWaves;
+            
+    	} else if (keyChar == 'm') {
+            showMovement = !showMovement;
+            
+    	} else if (keyChar == 's') {
+            showSelfWaves = !showSelfWaves;
+            
+    	} else if (keyChar == 'v') {
+            showVBullets = !showVBullets;
+            
+    	} else if (keyChar == 'x') {
+    		if (statsMode < 2) {
+                statsMode += 1;
+            } else {
+                statsMode = 0;
+            }
 
-
-    	latestEightKeys = latestEightKeys.substring(1) + e.getKeyChar();
-    	if (e.getKeyChar() == 'd')
-    	{
-    		showDistanceCircles = !showDistanceCircles;
-    	}
-    	else if (e.getKeyChar() == 'w')
-    	{
-    		showEnemyWaves = !showEnemyWaves;
-    	}
-    	else if (e.getKeyChar() == 'm')
-    	{
-    		showMovement = !showMovement;
-    	}
-    	else if (e.getKeyChar() == 's')
-    	{
-    		showSelfWaves = !showSelfWaves;
-    	}
-    	else if (e.getKeyChar() == 'v')
-    	{
-    		showVBullets = !showVBullets;
-    	}
-    	else if (e.getKeyChar() == 'x')
-    	{
-    		if (statsMode < 2)
-    			statsMode += 1;
-    		else
-    			statsMode = 0;
-    	} else if (e.getKeyChar() == 'f') {
+    	} else if (keyChar == 'f') {
             showMenu = !showMenu;
+
         }
     	if (disableGunPass.equals(latestEightKeys))
     	{
@@ -735,7 +594,7 @@ public class SleepSiphon extends AdvancedRobot
 	    	waveMgr.paint(g);
     	}
 
-    	if (showMovement && destinations != null)
+    	if (showMovement)
     	{
 	    	mover.paint(g);
     	}
