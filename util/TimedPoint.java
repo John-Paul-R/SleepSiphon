@@ -14,7 +14,12 @@ public class TimedPoint extends Point2D
 		this.Y = y;
 		this.t = time;
 	}
-	
+	public TimedPoint(Point2D point, long time)
+	{
+		this.X = point.getX();
+		this.Y = point.getY();
+		this.t = time;
+	}
 	@Override
 	public double getX() {return X;}
 

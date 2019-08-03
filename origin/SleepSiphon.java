@@ -3,14 +3,15 @@ package origin;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map.Entry;
 
 import gun.VirtualAngleGuns;
@@ -26,7 +27,6 @@ import robocode.RobotDeathEvent;
 import robocode.RoundEndedEvent;
 import robocode.Rules;
 import robocode.ScannedRobotEvent;
-import util.TimedWeightedPoint;
 
 /*
 SleepSiphon - � 2018 John Paul Rutigliano
@@ -167,6 +167,9 @@ public class SleepSiphon extends AdvancedRobot
 		//TODO When 2 concecutive bullets hit, detect if enemy is shooting at you head on, then adjust direction accordingly (this is to be added to movement systems like four-corners)
 	    //TODO also, possibly target people who are shooting at you?
 		while(true) {
+
+            
+
 			//TODO mimimum risk movement
             //setGunColor(Graphics.cycleRandomColors());
 			scanOrder = 0;//reset scanOrder for next radar pass
@@ -464,8 +467,14 @@ public class SleepSiphon extends AdvancedRobot
 	{
 		System.out.println("I HIT A WALL!");
 	}
+    private List<Point2D> pathPointsTest;
+    @Override
+    public void onMousePressed(MouseEvent e) {
+        super.onMousePressed(e);
+        pathPointsTest = move.MinRiskPathsOld.genPathToPoint(this, e.getPoint());
 
-
+    }
+    @Override
     public void onRobotDeath(RobotDeathEvent e)
     {
 
@@ -598,6 +607,10 @@ public class SleepSiphon extends AdvancedRobot
     	{
 	    	mover.paint(g);
     	}
+
+        if (pathPointsTest != null)
+            move.MinRiskPathsOld.paintPointList(g, pathPointsTest, Color.RED, 4);
+        
 
     	//STATS & OPTIONS TEXT
         if (!showMenu) {
